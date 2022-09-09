@@ -162,7 +162,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val latLngOrigin = LatLng(lastLocation.latitude, lastLocation.longitude) //current location
         val latLngDestination = destination // Fano
         for (i in 0 until waypoint.size){
-            mMap!!.addMarker(MarkerOptions().position(waypoint[i]).title("Point" + i))
+            mMap.addMarker(MarkerOptions().position(waypoint[i]).title("Point" + i))
         }
 
         //val latLngWaypoint = waypoint // Mondolfo
@@ -174,19 +174,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.addMarker(MarkerOptions()
                              .position(latLngDestination)
                              .title("Destination"))
-        /*
-        mMap!!.addMarker(MarkerOptions().position(latLngWaypoint).title("Point1"))
-        mMap!!.addMarker(MarkerOptions().position(latLngWaypoint).title("Point1"))
-        mMap!!.addMarker(MarkerOptions().position(latLngWaypoint).title("Point1"))
-        */
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngOrigin, 11f))
         val path: MutableList<List<LatLng>> = ArrayList()
+
+        /*
         //val urlDirections = "https://maps.googleapis.com/maps/api/directions/json?origin=43.7149517,13.2179488&destination=43.8424173,13.0146632&key=$MAPS_API_KEY"
         val urlDirections = "https://maps.googleapis.com/maps/api/directions/json?origin="+ lastLocation.latitude + "," + lastLocation.longitude +
                              "&destination="+ destination.latitude + "," + destination.longitude +"&waypoints=via%3A"+ waypoint[0].latitude + "," +
                                waypoint[0].longitude + "|via%3A" + waypoint[1].latitude + "," + waypoint[1].longitude + "|via%3A" + waypoint[2].latitude +
                               "," + waypoint[2].longitude + "&key=$MAPS_API_KEY"
+         */
+
+        //Composizione del path per la richiesta all'API di Google Maps con i campi passatti
+        var urlDirections = ""
+        for (i in 0 until waypoint.size){
+            if(i==0){
+                 urlDirections = "https://maps.googleapis.com/maps/api/directions/json?origin="+ lastLocation.latitude + "," + lastLocation.longitude +
+                        "&destination="+ destination.latitude + "," + destination.longitude + "&waypoints=via%3A"+ waypoint[i].latitude + "," +
+                        waypoint[i].longitude
+            }
+            else if (i < waypoint.size){
+                 urlDirections = urlDirections + "|via%3A" + waypoint[i].latitude + "," + waypoint[i].longitude
+               }
+            if (i== waypoint.size) {
+                   urlDirections = urlDirections + "|via%3A" + waypoint[i].latitude + "," + waypoint[i].longitude
+               }
+        }
+        //Add the key to the path
+        urlDirections += "&key=$MAPS_API_KEY"
+
+        //Generazione della richiesta
         val directionsRequest = object : StringRequest(Request.Method.GET, urlDirections, Response1.Listener<String> {
                 response ->
             val jsonResponse = JSONObject(response)
@@ -208,10 +226,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val requestQueue = Volley.newRequestQueue(this)
         requestQueue.add(directionsRequest)
        }
-
-    /*
-    ergegeg
-     */
 
 
 }
